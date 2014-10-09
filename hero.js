@@ -79,7 +79,7 @@
 //   }
 // };
 
-// // The "Safe Diamond Miner"
+// // The "kill and run"
 var move = function(gameData, helpers) {
   var myHero = gameData.activeHero;
 
@@ -93,16 +93,59 @@ var move = function(gameData, helpers) {
   var directionToHealthWell = healthWellStats.direction;
   
 
-  if (myHero.health < 40) {
+  if (myHero.health < 60) {
     //Heal no matter what if low health
     return directionToHealthWell;
   } else if (myHero.health < 100 && distanceToHealthWell === 1) {
     //Heal if you aren't full health and are close to a health well already
     return directionToHealthWell;
   } else {
-    //If healthy, go capture a diamond mine!
-    return helpers.findNearestNonTeamDiamondMine(gameData);
+     
+     
+    var enemy = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(enemyTile) {
+      //   console.log(enemyTile);
+         return enemyTile.type === 'Hero' && enemyTile.team !== myHero.team;
+    });
+    
+    //if(enemy)
+        
+    var diamondMine = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(mineTile) {
+         //console.log(mineTile);
+          if (mineTile.type === 'DiamondMine') {
+            if (mineTile.owner) {
+              return mineTile.owner.team !== hero.team;
+            } else {
+              return true;
+            }
+          } else {
+            return false;
+          }
+    });    
+   //     console.log(diamondMine);
+    //    console.log(enemy);
+        
+        if(diamondMine !== false)
+        {
+          if(enemy.distance < diamondMine.distance)   {
+              return enemy.direction;
+          } else {
+               return diamondMine.direction;
+          }
+        } else {
+             return enemy.direction;
+        }
+  //  return helpers.findNearestNonTeamDiamondMine(gameData);
+    //console.log(enemy);
   }
+  
+  //1 evade logic ( run bitch run )
+  
+  // agression logic
+  
+  
+  // maneurs
+  
+  
 };
 
 // // The "Selfish Diamond Miner"

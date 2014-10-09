@@ -26,11 +26,40 @@ var Game = require('./game_logic/Game.js');
 var heroMoveFunction = require('./hero.js');
 
 //The move function ("brain") the practice enemy will use
+//var enemyMoveFunction = function(gameData, helpers) {
+//  //Move in a random direction
+//  var choices = ['North', 'South', 'East', 'West'];
+//  return choices[Math.floor(Math.random()*4)];
+//}
+
 var enemyMoveFunction = function(gameData, helpers) {
-  //Move in a random direction
-  var choices = ['North', 'South', 'East', 'West'];
-  return choices[Math.floor(Math.random()*4)];
-}
+  var myHero = gameData.activeHero;
+
+  //Get stats on the nearest health well
+  var healthWellStats = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(boardTile) {
+    if (boardTile.type === 'HealthWell') {
+      return true;
+    }
+  });
+  var distanceToHealthWell = healthWellStats.distance;
+  var directionToHealthWell = healthWellStats.direction;
+  
+
+  if (myHero.health < 40) {
+    //Heal no matter what if low health
+    return directionToHealthWell;
+  } else if (myHero.health < 100 && distanceToHealthWell === 1) {
+    //Heal if you aren't full health and are close to a health well already
+    return directionToHealthWell;
+  } else if (myHero.health > 50){
+    //Attack nearest weaker enemy if healthy
+    return helpers.findNearestWeakerEnemy(gameData)
+  }else {
+    //If healthy, go capture a diamond mine!
+    return helpers.findNearestNonTeamDiamondMine(gameData);
+  }
+};
+
 
 //Makes a new game with a 5x5 board
 var game = new Game(5);
@@ -56,7 +85,7 @@ console.log('About to start the game!  Here is what the board looks like:');
 game.board.inspect();
 
 //Play a very short practice game
-var turnsToPlay = 15;
+var turnsToPlay = 1200;
 
 for (var i=0; i<turnsToPlay; i++) {
   var hero = game.activeHero;
